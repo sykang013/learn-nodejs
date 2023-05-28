@@ -12,7 +12,7 @@ const server = http
       const data = await fs.readFile("./server.html");
       res.end(data);
     } catch (error) {
-      console.error(err);
+      console.error(error);
       res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
       res.end(err.message);
     }
