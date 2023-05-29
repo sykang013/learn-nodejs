@@ -22,22 +22,19 @@ app.set("port", process.env.PORT || 3000);
 // app.use 는 모든 코드에서 실행됨
 // 미들웨어는 아래 코드에서 (req... 부터 시작해서 ...next();} 까지이다.
 // 미들웨어는 next()를 꼭 사용해줘야 다음 단계(맞는 주소)를 찾아간다.
-// 미들웨어를 아래처럼 여러개 사용할 수도 있다.
 app.use(
   (req, res, next) => {
     console.log("1 요청에 실행하고 싶다.");
     next();
   },
   (req, res, next) => {
-    console.log("2 요청에 실행하고 싶다.");
-    next();
-  },
-  (req, res, next) => {
-    console.log("3 요청에 실행하고 싶다.");
-    next();
-  },
-  (req, res, next) => {
-    throw new Error("에러 발생");
+    try {
+      console.log(일부러에러내기);
+    } catch (error) {
+      // next() 에 인수가 없으면 다음 미들웨어로 순차적으로 넘어가는데, next(error)라면
+      // 다음 '에러처리 미들웨어'로 넘어간다.
+      next(error);
+    }
   }
 );
 
