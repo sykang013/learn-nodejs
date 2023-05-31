@@ -17,6 +17,8 @@ const nunjucks = require("nunjucks");
 const dotenv = require("dotenv");
 // 9-3. 패스포트 불러오기
 const passport = require("passport");
+// 9-2. db객체 안에 들어있는 시퀄라이즈 연결(sync 필수)
+const { sequelize } = require("./models");
 
 // process.env.COOKIE_SECRET 없음(아래 코드 실행 전이니까)
 dotenv.config(); // .env 파일의 내용을 process.env 안에 넣어줌
@@ -26,8 +28,8 @@ dotenv.config(); // .env 파일의 내용을 process.env 안에 넣어줌
 // 라우터들을 아래 경로에 모아둘 계획
 const pageRouter = require("./routes/page");
 const authRouter = require("./routes/auth");
-// 9-2. db객체 안에 들어있는 시퀄라이즈 연결(sync 필수)
-const { sequelize } = require("./models");
+// 9-6. 포스트 라우터 추가
+const postRouter = require("./routes/post");
 // 9-3. 패스포트 폴더에서 설정할 것
 const passportConfig = require("./passport");
 
@@ -61,6 +63,8 @@ app.use(morgan("dev"));
 //// 보안상 프론트(브라우저)에서는 파일들에 접근불가한데, public만 허용해줌
 //// path.join(__dirname, 'public) app.js가 위치해있는 디렉토리의 public이란 폴더를 static으로 만들어라
 app.use(express.static(path.join(__dirname, "public")));
+// 9-6 프론트에서 서버에 있는 파일 가져오기 (이미지 경로)
+app.use("/img", express.static(path.join(__dirname, "uploads")));
 // req.body를 ajax json 요청 으로부터
 app.use(express.json());
 // req.body를 폼으로부터
@@ -90,6 +94,8 @@ app.use(passport.session());
 app.use("/", pageRouter);
 // 9-3.
 app.use("/auth", authRouter);
+// 9-6.
+app.use("/post", postRouter);
 
 // 404 미들웨어 / 요청이 왔는데 pageRouter에 없는 페이지인 경우
 app.use((req, res, next) => {
