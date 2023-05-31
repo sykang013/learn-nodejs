@@ -66,7 +66,7 @@ app.use(express.json());
 // req.body를 폼으로부터
 app.use(express.urlencoded({ extended: false }));
 // cookie 전송해주는 것 처리
-app.use(cookieParser(process.env.COOKIE_SECRET));
+app.use(cookieParser(process.env.COOKIE_SECRET)); // 쿠키파서의 역할은 객체로 만들어주기 {connect.sid: 12336128763}
 app.use(
   session({
     resave: false,
@@ -85,6 +85,7 @@ app.use(
 app.use(passport.initialize()); // req.user, req.login, req.isAuthenticate, req.logout 생성(패스포트가 로그인을 위한 것들을 생성해줌)
 // 9-3. connect.sid 라는 이름으로 세션 쿠키가 브라우저로 전송되면 로그인 완료
 app.use(passport.session());
+// 브라우저에 이렇게 저장됨 connect.sid=12336128763
 
 app.use("/", pageRouter);
 // 9-3.
