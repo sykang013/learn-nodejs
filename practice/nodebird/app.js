@@ -15,6 +15,8 @@ const session = require("express-session");
 const nunjucks = require("nunjucks");
 // 설정 파일인 dotenv 파일 불러오는 모듈
 const dotenv = require("dotenv");
+// 9-2. db객체 안에 들어있는 시퀄라이즈 연결(sync 필수)
+const { sequelize } = require("./models");
 
 // process.env.COOKIE_SECRET 없음(아래 코드 실행 전이니까)
 dotenv.config(); // .env 파일의 내용을 process.env 안에 넣어줌
@@ -34,6 +36,16 @@ nunjucks.configure("views", {
   express: app,
   watch: true,
 });
+
+// 9-2. sync를 해줘야 연결이 된다(연결 실행)
+sequelize
+  .sync()
+  .then(() => {
+    console.log("데이터베이스 연결 성공");
+  })
+  .catch((err) => {
+    console.log(err);
+  });
 
 // 로깅 남는것이 서버에 용량을 많이 차지함. 개발할 때는 dev(자세하게 기록이 나옴), 추후 배포해서 운영할 때에는 combined로 진짜 필요한 것만 나오도록 함
 app.use(morgan("dev"));
