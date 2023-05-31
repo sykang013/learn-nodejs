@@ -10,11 +10,12 @@ const {
   renderProfile,
   renderMain,
 } = require("../controllers/page");
+const { isLoggedIn, isNotLoggedIn } = require("../middlewares");
 
 // 라우터들에서 공통적으로 쓸 수 있는 데이터를 담은 변수를 선언하는 자리가 res.locals
 router.use((req, res, next) => {
-  // 일단 만들어두고 비워뒀음
-  res.locals.user = null;
+  // 9-3. req.user 입력
+  res.locals.user = req.user;
   res.locals.followerCount = 0;
   res.locals.followingCount = 0;
   res.locals.followingIdList = [];
@@ -24,8 +25,11 @@ router.use((req, res, next) => {
 
 // 메인화면
 //// 라우터의 마지막 미들웨어는 '컨트롤러'라고 불린다(renderProfile, renderMain 같은 애들)
-router.get("/profile", renderProfile);
-router.get("/join", renderJoin);
+// 9-3. 패스포트의 isLoggedIn, isNotLoggedIng
+//// 로그인 한 사람만 프로필 렌더하게
+router.get("/profile", isLoggedIn, renderProfile);
+//// 로그인 안 한 사람만 회원가입 가능하게
+router.get("/join", isNotLoggedIn, renderJoin);
 router.get("/", renderMain);
 
 module.exports = router;

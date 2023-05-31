@@ -15,8 +15,8 @@ const session = require("express-session");
 const nunjucks = require("nunjucks");
 // 설정 파일인 dotenv 파일 불러오는 모듈
 const dotenv = require("dotenv");
-// 9-2. db객체 안에 들어있는 시퀄라이즈 연결(sync 필수)
-const { sequelize } = require("./models");
+// 9-3. 패스포트 불러오기
+const passport = require("passport");
 
 // process.env.COOKIE_SECRET 없음(아래 코드 실행 전이니까)
 dotenv.config(); // .env 파일의 내용을 process.env 안에 넣어줌
@@ -25,8 +25,16 @@ dotenv.config(); // .env 파일의 내용을 process.env 안에 넣어줌
 
 // 라우터들을 아래 경로에 모아둘 계획
 const pageRouter = require("./routes/page");
+const authRouter = require("./routes/auth");
+// 9-2. db객체 안에 들어있는 시퀄라이즈 연결(sync 필수)
+const { sequelize } = require("./models");
+// 9-3. 패스포트 폴더에서 설정할 것
+const passportConfig = require("./passport");
+
 // express 불러오기
 const app = express();
+// 9-3.
+passportConfig();
 // 포트 설정
 app.set("port", process.envPORT || 8001);
 // view 엔진 / 페이지 확장자는 html
@@ -53,9 +61,9 @@ app.use(morgan("dev"));
 //// 보안상 프론트(브라우저)에서는 파일들에 접근불가한데, public만 허용해줌
 //// path.join(__dirname, 'public) app.js가 위치해있는 디렉토리의 public이란 폴더를 static으로 만들어라
 app.use(express.static(path.join(__dirname, "public")));
-// json 요청 받을 수 있도록 설정
+// req.body를 ajax json 요청 으로부터
 app.use(express.json());
-// 폼 요청 받을 수 있도록 설정
+// req.body를 폼으로부터
 app.use(express.urlencoded({ extended: false }));
 // cookie 전송해주는 것 처리
 app.use(cookieParser(process.env.COOKIE_SECRET));
@@ -73,8 +81,15 @@ app.use(
     },
   })
 );
+// 9-3. 패스포트 미들웨어는 반드시 express session 밑에 붙여야한다
+app.use(passport.initialize()); // req.user, req.login, req.isAuthenticate, req.logout 생성(패스포트가 로그인을 위한 것들을 생성해줌)
+// 9-3. connect.sid 라는 이름으로 세션 쿠키가 브라우저로 전송되면 로그인 완료
+app.use(passport.session());
 
 app.use("/", pageRouter);
+// 9-3.
+app.use("/auth", authRouter);
+
 // 404 미들웨어 / 요청이 왔는데 pageRouter에 없는 페이지인 경우
 app.use((req, res, next) => {
   const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
